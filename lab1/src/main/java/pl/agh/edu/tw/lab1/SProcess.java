@@ -49,36 +49,44 @@ public class SProcess implements Runnable {
     public void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-                numberFull.P();
-                LOG.info("S process acquired numberFull");
-                useNumber.P();
-                LOG.info("S process acquired useNumber");
-                innerQueue.add(numberBuffer.poll());
-                useNumber.V();
-                LOG.info("S process signalled useNumber");
-                numberEmpty.V();
-                LOG.info("S process signalled numberEmpty");
-                if (innerQueue.size() == 2) {
-                    final Integer a = innerQueue.poll();
-                    final Integer b = innerQueue.poll();
-                    LOG.info("S process took two numbers from the top of innerQueue: {}, {}", a, b);
-                    aggregateEmpty.P();
-                    LOG.info("S process acquired aggregateEmpty");
-                    useAggregate.P();
-                    LOG.info("S process acquired useAggregate");
-                    aggregateBuffer.add(a + b);
-                    LOG.info("S process added {} to the aggregate buffer", a+b);
-                    useAggregate.V();
-                    LOG.info("S process signalled useAggregate");
-                    if (aggregateBuffer.size() == aggregateSize) {
-                        aggregateFull.V();
-                        LOG.info("Aggregate buffer full so S process signaled aggregateFull");
-                    }
-                }
-                TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
+                doRun();
             }
         } catch (InterruptedException ex) {
             LOG.info("S process has been interrupted");
+        }
+    }
+
+    private void doRun() throws InterruptedException {
+        numberFull.P();
+        LOG.info("S process acquired numberFull");
+        useNumber.P();
+        LOG.info("S process acquired useNumber");
+        innerQueue.add(numberBuffer.poll());
+        useNumber.V();
+        LOG.info("S process signalled useNumber");
+        numberEmpty.V();
+        LOG.info("S process signalled numberEmpty");
+        if (innerQueue.size() == 2) {
+            produceToAggregateBuffer();
+        }
+        TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
+    }
+
+    private void produceToAggregateBuffer() throws InterruptedException {
+        final Integer a = innerQueue.poll();
+        final Integer b = innerQueue.poll();
+        LOG.info("S process took two numbers from the top of innerQueue: {}, {}", a, b);
+        aggregateEmpty.P();
+        LOG.info("S process acquired aggregateEmpty");
+        useAggregate.P();
+        LOG.info("S process acquired useAggregate");
+        aggregateBuffer.add(a + b);
+        LOG.info("S process added {} to the aggregate buffer", a+b);
+        useAggregate.V();
+        LOG.info("S process signalled useAggregate");
+        if (aggregateBuffer.size() == aggregateSize) {
+            aggregateFull.V();
+            LOG.info("Aggregate buffer full so S process signaled aggregateFull");
         }
     }
 }

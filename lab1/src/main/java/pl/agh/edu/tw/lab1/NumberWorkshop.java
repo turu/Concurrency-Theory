@@ -44,17 +44,25 @@ public class NumberWorkshop {
 
     public void play(int playTimeInSec) {
         try {
-            executorService.submit(kProcess);
-            executorService.submit(sProcess);
-            for (PProcess p : producers) {
-                executorService.submit(p);
-                TimeUnit.MILLISECONDS.sleep(random.nextInt(1000));
-            }
+            submitTasks();
             TimeUnit.SECONDS.sleep(playTimeInSec);
         } catch (InterruptedException e) {
             LOG.info("NumberWorkshop interrupted");
         }
         executorService.shutdownNow();
+        displayStats();
+    }
+
+    private void submitTasks() throws InterruptedException {
+        executorService.submit(kProcess);
+        executorService.submit(sProcess);
+        for (PProcess p : producers) {
+            executorService.submit(p);
+            TimeUnit.MILLISECONDS.sleep(random.nextInt(1000));
+        }
+    }
+
+    private void displayStats() {
         LOG.info("Total sum of produced numbers: {}", PProcess.getTotalProducedSum());
         LOG.info("Total sum of consumed numbers: {}", KProcess.getTotalConsumedSum());
         final int numberSum = sumOfNumbersInBuffer(numberBuffer);

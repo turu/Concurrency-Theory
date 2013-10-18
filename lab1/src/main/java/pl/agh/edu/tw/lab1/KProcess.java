@@ -32,26 +32,30 @@ public class KProcess implements Runnable {
     public void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-                aggregateFull.P();
-                LOG.info("Process K acquired aggregateFull");
-                useAggregate.P();
-                LOG.info("Process K acquired useAggregate");
-                displayAndEmpty();
-                useAggregate.V();
-                LOG.info("Process K signalled useAggregate");
-                signalAggregateBuffer();
-                TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
+                doRun();
             }
         } catch (InterruptedException e) {
             LOG.info("K process has been interrupted");
         }
     }
 
+    private void doRun() throws InterruptedException {
+        aggregateFull.P();
+        LOG.info("Process K acquired aggregateFull");
+        useAggregate.P();
+        LOG.info("Process K acquired useAggregate");
+        displayBuffer();
+        useAggregate.V();
+        LOG.info("Process K signalled useAggregate");
+        signalAndClearAggregateBuffer();
+        TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
+    }
+
     public static int getTotalConsumedSum() {
         return totalConsumedSum;
     }
 
-    private void signalAggregateBuffer() {
+    private void signalAndClearAggregateBuffer() {
         LOG.info("Signaling the aggregateEmpty semaphore");
         for (int i = 0; i < aggregateBuffer.size(); i++) {
             aggregateEmpty.V();
@@ -60,7 +64,7 @@ public class KProcess implements Runnable {
         aggregateBuffer.clear();
     }
 
-    private void displayAndEmpty() {
+    private void displayBuffer() {
         LOG.info("Emptying aggregate buffer: {}", aggregateBuffer);
         int sum = 0;
         for (Integer v : aggregateBuffer) {

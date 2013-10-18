@@ -38,23 +38,27 @@ public class PProcess implements Runnable {
     public void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-                numberEmpty.P();
-                LOG.info("P process {} acquired numberEmpty", uid);
-                useNumber.P();
-                LOG.info("P process {} acquired useNumber", uid);
-                final int toAdd = random.nextInt(100);
-                numberBuffer.add(toAdd);
-                totalProducedSum += toAdd;
-                LOG.info("P process {} added {} to the number buffer", uid, toAdd);
-                useNumber.V();
-                LOG.info("P process {} signalled useNumber", uid);
-                numberFull.V();
-                LOG.info("P process {} signalled numberFull", uid);
-                TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
+                doRun();
             }
         } catch (InterruptedException ex) {
             LOG.info("P process {} has been interrupted", uid);
         }
+    }
+
+    private void doRun() throws InterruptedException {
+        numberEmpty.P();
+        LOG.info("P process {} acquired numberEmpty", uid);
+        useNumber.P();
+        LOG.info("P process {} acquired useNumber", uid);
+        final int toAdd = random.nextInt(100);
+        numberBuffer.add(toAdd);
+        totalProducedSum += toAdd;
+        LOG.info("P process {} added {} to the number buffer", uid, toAdd);
+        useNumber.V();
+        LOG.info("P process {} signalled useNumber", uid);
+        numberFull.V();
+        LOG.info("P process {} signalled numberFull", uid);
+        TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
     }
 
     public static int getTotalProducedSum() {
