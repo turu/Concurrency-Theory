@@ -14,11 +14,9 @@ public class BinarySemaphore {
     public void V() {
         synchronized (this) {
             if (waitCount > 0) {
-                isOpen = true;
                 this.notify();
-            } else {
-                isOpen = true;
             }
+            isOpen = true;
         }
     }
 

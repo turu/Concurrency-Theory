@@ -14,11 +14,9 @@ public class Semaphore {
     public void V() {
         synchronized (this) {
             if (waitCount > 0) {
-                value++;
                 this.notify();
-            } else {
-                value++;
             }
+            value++;
         }
     }
 
