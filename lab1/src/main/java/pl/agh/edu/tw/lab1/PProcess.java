@@ -56,8 +56,10 @@ public class PProcess implements Runnable {
         LOG.info("P process {} added {} to the number buffer", uid, toAdd);
         useNumber.V();
         LOG.info("P process {} signalled useNumber", uid);
-        numberFull.V();
-        LOG.info("P process {} signalled numberFull", uid);
+        if (numberBuffer.size() >= 2) {
+            numberFull.V();
+            LOG.info("P process {} signalled numberFull", uid);
+        }
         TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
     }
 
