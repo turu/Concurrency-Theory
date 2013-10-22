@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class Runner {
     private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
 
-    private final ExecutorService executorService = new ScheduledThreadPoolExecutor(2);
+    private final ExecutorService executorService = new ScheduledThreadPoolExecutor(20);
 
     private final Random random = new Random();
     private final Buffer buffer;
@@ -65,11 +65,14 @@ public class Runner {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        int n = 10;
+        int n = 10, m = 20, l = 5;
         LOG.info("Running single element, single producer, single consumer variant...");
         new Runner(1, 30, 1, 1).play();
         TimeUnit.SECONDS.sleep(5);
-        LOG.info("Running single {} elements, single producer, single consumer variant", n);
+        LOG.info("Running {} elements, single producer, single consumer variant", n);
         new Runner(n, 30, 1, 1).play();
+        TimeUnit.SECONDS.sleep(5);
+        LOG.info("Running {} elements, {} producers, {} consumers variant", n, m, l);
+        new Runner(n, 30, m, l).play();
     }
 }

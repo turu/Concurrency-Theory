@@ -10,8 +10,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class Consumer implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(Consumer.class);
+    private static int ID = 1;
     private final Buffer buffer;
     private final int sleepTimeInMs;
+    private final int id = ID++;
 
     public Consumer(Buffer buffer, int sleepTimeInMs) {
         this.buffer = buffer;
@@ -24,6 +26,7 @@ public class Consumer implements Runnable {
             while(!Thread.currentThread().isInterrupted()) {
                 synchronized (buffer) {
                     while (buffer.isEmpty()) {
+                        LOG.info("Consumer {} waiting on lock", id);
                         buffer.wait();
                     }
                     doConsume();
@@ -37,7 +40,7 @@ public class Consumer implements Runnable {
     }
 
     private void doConsume() {
-        LOG.info("pl.agh.edu.tw.lab2.Consumer consumed {}", buffer.poll());
+        LOG.info("Consumer {} consumed {}", id, buffer.poll());
     }
 
 }

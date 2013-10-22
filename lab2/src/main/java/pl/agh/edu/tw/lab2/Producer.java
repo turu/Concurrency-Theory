@@ -11,9 +11,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class Producer implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(Consumer.class);
+    private static int ID = 1;
     private final Buffer buffer;
     private final Random random = new Random();
     private final int sleepTimeInMs;
+    private final int id = ID++;
 
     public Producer(Buffer buffer, int sleepTimeInMs) {
         this.buffer = buffer;
@@ -26,6 +28,7 @@ public class Producer implements Runnable {
             while(!Thread.currentThread().isInterrupted()) {
                 synchronized (buffer) {
                     while (buffer.isFull()) {
+                        LOG.info("Producer {} waiting on lock", id);
                         buffer.wait();
                     }
                     doProduce();
@@ -34,13 +37,13 @@ public class Producer implements Runnable {
                 }
             }
         } catch (InterruptedException ex) {
-            LOG.info("pl.agh.edu.tw.lab2.Consumer has been interrupted");
+            LOG.info("Producer has been interrupted");
         }
     }
 
     private void doProduce() {
         final int v = random.nextInt(1000);
         buffer.add(v);
-        LOG.info("pl.agh.edu.tw.lab2.Producer produced {}", v);
+        LOG.info("Producer {} produced {}", id, v);
     }
 }
