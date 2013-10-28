@@ -33,8 +33,8 @@ public class Producer implements Runnable {
                     }
                     doProduce();
                     buffer.notify();
-                    TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
                 }
+                TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
             }
         } catch (InterruptedException ex) {
             LOG.info("Producer has been interrupted");

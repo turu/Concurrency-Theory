@@ -31,8 +31,8 @@ public class Consumer implements Runnable {
                     }
                     doConsume();
                     buffer.notify();
-                    TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
                 }
+                TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
             }
         } catch (InterruptedException ex) {
             LOG.info("pl.agh.edu.tw.lab2.Consumer has been interrupted");

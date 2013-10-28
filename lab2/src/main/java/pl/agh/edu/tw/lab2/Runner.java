@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class Runner {
     private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
 
-    private final ExecutorService executorService = new ScheduledThreadPoolExecutor(20);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(20);
 
     private final Random random = new Random();
     private final Buffer buffer;
@@ -71,6 +72,9 @@ public class Runner {
         TimeUnit.SECONDS.sleep(5);
         LOG.info("Running {} elements, single producer, single consumer variant", n);
         new Runner(n, 30, 1, 1).play();
+        TimeUnit.SECONDS.sleep(5);
+        LOG.info("Running single element, {} producers, {} consumers variant", m, l);
+        new Runner(1, 30, m, l).play();
         TimeUnit.SECONDS.sleep(5);
         LOG.info("Running {} elements, {} producers, {} consumers variant", n, m, l);
         new Runner(n, 30, m, l).play();
