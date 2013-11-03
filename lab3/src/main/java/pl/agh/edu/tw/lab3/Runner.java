@@ -44,8 +44,8 @@ public class Runner {
     }
 
     private void submitTasks() {
-        submitConsumers();
         submitProducers();
+        submitConsumers();
     }
 
     private void submitProducers() {
