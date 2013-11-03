@@ -42,11 +42,7 @@ public class KProcess implements Runnable {
     private void doRun() throws InterruptedException {
         aggregateFull.P();
         LOG.info("Process K acquired aggregateFull");
-//        useAggregate.P();
-//        LOG.info("Process K acquired useAggregate");
         displayBuffer();
-//        useAggregate.V();
-//        LOG.info("Process K signalled useAggregate");
         signalAndClearAggregateBuffer();
         TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
     }

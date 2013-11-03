@@ -56,7 +56,7 @@ public class PProcess implements Runnable {
         LOG.info("P process {} added {} to the number buffer", uid, toAdd);
         useNumber.V();
         LOG.info("P process {} signalled useNumber", uid);
-        if (numberBuffer.size() >= 2) {
+        if (numberBuffer.size() % 2 ==0) {
             numberFull.V();
             LOG.info("P process {} signalled numberFull", uid);
         }

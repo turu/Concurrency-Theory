@@ -58,7 +58,7 @@ public class SProcess implements Runnable {
 
     private void doRun() throws InterruptedException {
         numberFull.P();
-        numberFull.P();
+//        numberFull.P();
         LOG.info("S process acquired numberFull");
         useNumber.P();
         LOG.info("S process acquired useNumber");
@@ -79,12 +79,8 @@ public class SProcess implements Runnable {
         LOG.info("S process took two numbers from the top of innerQueue: {}, {}", a, b);
         aggregateEmpty.P();
         LOG.info("S process acquired aggregateEmpty");
-//        useAggregate.P();
-//        LOG.info("S process acquired useAggregate");
         aggregateBuffer.add(a + b);
         LOG.info("S process added {} to the aggregate buffer", a+b);
-//        useAggregate.V();
-//        LOG.info("S process signalled useAggregate");
         if (aggregateBuffer.size() == aggregateSize) {
             aggregateFull.V();
             LOG.info("Aggregate buffer full so S process signaled aggregateFull");
