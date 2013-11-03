@@ -27,8 +27,8 @@ public class AsynchronousProducersConsumersMonitor<T> {
 
     public AsynchronousProducersConsumersMonitor(int resourceCount) {
         this.resourceCount = resourceCount;
+        createResources(resourceCount);
     }
-
 
     public Resource<T> produceBegin() throws InterruptedException {
         Resource<T> resource = null;
@@ -93,4 +93,19 @@ public class AsynchronousProducersConsumersMonitor<T> {
     public int getResourceCount() {
         return resourceCount;
     }
+
+    private void createResources(int resourceCount) {
+        while (resourceCount > 0) {
+            freeQueue.add(createResource());
+            resourceCount--;
+        }
+    }
+
+    private Resource<T> createResource() {
+        final Resource<T> resource = new Resource<T>();
+        resource.setState(ResourceState.FREE);
+        return resource;
+    }
+
+
 }
