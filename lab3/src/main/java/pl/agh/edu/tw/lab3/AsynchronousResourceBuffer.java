@@ -11,8 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Author: Piotr Turek
  */
-public class AsynchronousProducersConsumersMonitor<T> {
-    private final static Logger LOG = LoggerFactory.getLogger(AsynchronousProducersConsumersMonitor.class);
+public class AsynchronousResourceBuffer<T> {
+    private final static Logger LOG = LoggerFactory.getLogger(AsynchronousResourceBuffer.class);
 
     private final ReentrantLock freeQueueLock = new ReentrantLock();
     private final ReentrantLock fullQueueLock = new ReentrantLock();
@@ -25,9 +25,9 @@ public class AsynchronousProducersConsumersMonitor<T> {
     private final Queue<Resource<T>> fullQueue = new ArrayDeque<Resource<T>>();
     private final int resourceCount;
 
-    public AsynchronousProducersConsumersMonitor(int resourceCount) {
+    public AsynchronousResourceBuffer(int resourceCount) {
         this.resourceCount = resourceCount;
-        createResources(resourceCount);
+        initResources(resourceCount);
     }
 
     public Resource<T> produceBegin() throws InterruptedException {
@@ -43,6 +43,7 @@ public class AsynchronousProducersConsumersMonitor<T> {
         }
         freeNotFull.signal();
         resource.setState(ResourceState.IN_PRODUCTION);
+        resource.setValue(null);
         return resource;
     }
 
@@ -94,7 +95,7 @@ public class AsynchronousProducersConsumersMonitor<T> {
         return resourceCount;
     }
 
-    private void createResources(int resourceCount) {
+    private void initResources(int resourceCount) {
         while (resourceCount > 0) {
             freeQueue.add(createResource());
             resourceCount--;
