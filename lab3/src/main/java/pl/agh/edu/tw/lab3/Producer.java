@@ -38,7 +38,7 @@ public class Producer implements Runnable {
 
     private void doProduce() throws InterruptedException {
         final Resource<Integer> resource = buffer.produceBegin();
-        LOG.info("Producer {} acquired resource to produce");
+        LOG.info("Producer {} acquired resource to produce", id);
         TimeUnit.MILLISECONDS.sleep(prodTimeInMs);
         resource.setValue(random.nextInt(1000));
         buffer.produceEnd(resource);

@@ -38,10 +38,10 @@ public class AsynchronousResourceBuffer<T> {
                 freeNotEmpty.await();
             }
             resource = freeQueue.poll();
+            freeNotFull.signal();
         } finally {
             freeQueueLock.unlock();
         }
-        freeNotFull.signal();
         resource.setState(ResourceState.IN_PRODUCTION);
         resource.setValue(null);
         return resource;
@@ -55,10 +55,10 @@ public class AsynchronousResourceBuffer<T> {
                 fullNotFull.await();
             }
             fullQueue.add(resource);
+            fullNotEmpty.signal();
         } finally {
             fullQueueLock.unlock();
         }
-        fullNotEmpty.signal();
     }
 
     public Resource<T> consumeBegin() throws InterruptedException {
@@ -69,10 +69,10 @@ public class AsynchronousResourceBuffer<T> {
                 fullNotEmpty.await();
             }
             resource = fullQueue.poll();
+            fullNotFull.signal();
         } finally {
             fullQueueLock.unlock();
         }
-        fullNotFull.signal();
         resource.setState(ResourceState.IN_CONSUMPTION);
         return resource;
     }
@@ -85,10 +85,10 @@ public class AsynchronousResourceBuffer<T> {
                 freeNotFull.await();
             }
             freeQueue.add(resource);
+            freeNotEmpty.signal();
         } finally {
             freeQueueLock.unlock();
         }
-        freeNotEmpty.signal();
     }
 
     public int getResourceCount() {
@@ -107,6 +107,5 @@ public class AsynchronousResourceBuffer<T> {
         resource.setState(ResourceState.FREE);
         return resource;
     }
-
 
 }
