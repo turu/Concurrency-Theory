@@ -24,6 +24,8 @@ public class AsynchronousResourceBuffer<T> {
     private final Queue<Resource<T>> freeQueue = new ArrayDeque<Resource<T>>();
     private final Queue<Resource<T>> fullQueue = new ArrayDeque<Resource<T>>();
     private final int resourceCount;
+    private volatile int freeQueueSize;
+    private volatile int fullQueueSize;
 
     public AsynchronousResourceBuffer(int resourceCount) {
         this.resourceCount = resourceCount;
@@ -38,6 +40,7 @@ public class AsynchronousResourceBuffer<T> {
                 freeNotEmpty.await();
             }
             resource = freeQueue.poll();
+            freeQueueSize--;
             freeNotFull.signal();
         } finally {
             freeQueueLock.unlock();
@@ -51,10 +54,11 @@ public class AsynchronousResourceBuffer<T> {
         resource.setState(ResourceState.FULL);
         fullQueueLock.lock();
         try {
-            while (fullQueue.size() == resourceCount) {
+            while (fullQueue.size() == resourceCount - freeQueueSize) {
                 fullNotFull.await();
             }
             fullQueue.add(resource);
+            fullQueueSize++;
             fullNotEmpty.signal();
         } finally {
             fullQueueLock.unlock();
@@ -69,6 +73,7 @@ public class AsynchronousResourceBuffer<T> {
                 fullNotEmpty.await();
             }
             resource = fullQueue.poll();
+            fullQueueSize--;
             fullNotFull.signal();
         } finally {
             fullQueueLock.unlock();
@@ -81,10 +86,11 @@ public class AsynchronousResourceBuffer<T> {
         resource.setState(ResourceState.FREE);
         freeQueueLock.lock();
         try {
-            while (freeQueue.size() == resourceCount) {
+            while (freeQueue.size() == resourceCount - fullQueueSize) {
                 freeNotFull.await();
             }
             freeQueue.add(resource);
+            freeQueueSize++;
             freeNotEmpty.signal();
         } finally {
             freeQueueLock.unlock();

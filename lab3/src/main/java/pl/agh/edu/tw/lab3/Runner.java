@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class Runner {
     private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(20);
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     private final Random random = new Random();
     private final AsynchronousResourceBuffer<Integer> buffer;
@@ -44,8 +44,8 @@ public class Runner {
     }
 
     private void submitTasks() {
-        submitConsumers();
         submitProducers();
+        submitConsumers();
     }
 
     private void submitProducers() {
