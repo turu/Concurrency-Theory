@@ -3,6 +3,7 @@ package pl.agh.edu.tw.lab4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -10,16 +11,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * Author: Piotr Turek
  */
-public class Producer implements Runnable {
-    private static final Logger LOG = LoggerFactory.getLogger(Producer.class);
+public class SynchronousProducer implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(SynchronousProducer.class);
     private static int ID = 1;
-    private final AsynchronousResourceBuffer<Integer> buffer;
+    private final Buffer<Integer> buffer;
     private final Random random = new Random();
     private final int sleepTimeInMs;
     private final int prodTimeInMs;
     private final int id = ID++;
 
-    public Producer(AsynchronousResourceBuffer<Integer> buffer, int sleepTimeInMs, int prodTimeInMs) {
+    public SynchronousProducer(Buffer<Integer> buffer, int sleepTimeInMs, int prodTimeInMs) {
         this.buffer = buffer;
         this.sleepTimeInMs = sleepTimeInMs;
         this.prodTimeInMs = prodTimeInMs;
@@ -38,11 +39,14 @@ public class Producer implements Runnable {
     }
 
     private void doProduce() throws InterruptedException {
-//        final List<Resource<T>> resource = buffer.produceBegin();
-        LOG.info("Producer {} acquired resource to produce", id);
+        List<Integer> chunk = new ArrayList<Integer>();
+        int chunkSize = random.nextInt(10) + 1;
+        while (chunkSize > 0) {
+            chunk.add(random.nextInt(100));
+            chunkSize--;
+        }
+        buffer.produce(chunk);
+        LOG.info("Producer {} produced resource {}", id, chunk);
         TimeUnit.MILLISECONDS.sleep(prodTimeInMs);
-//        resource.setValue(random.nextInt(1000));
-//        buffer.produceEnd(resource);
-//        LOG.info("Producer {} produced resource {}", id, resource);
     }
 }

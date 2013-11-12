@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -20,19 +22,28 @@ public class AsynchronousResourceBuffer<T> {
     private final Condition freeNotFull = freeQueueLock.newCondition();
     private final Condition fullNotEmpty = fullQueueLock.newCondition();
     private final Condition fullNotFull = fullQueueLock.newCondition();
+    private final Condition firstProducer = freeQueueLock.newCondition();
+    private final Condition firstConsumer = fullQueueLock.newCondition();
 
     private final Queue<Resource<T>> freeQueue = new ArrayDeque<Resource<T>>();
     private final Queue<Resource<T>> fullQueue = new ArrayDeque<Resource<T>>();
     private final int resourceCount;
+    private final int maxChunkSize;
     private volatile int freeQueueSize;
     private volatile int fullQueueSize;
+    private boolean firstProducerWaits = false;
+    private boolean firstConsumerWaits = false;
 
     public AsynchronousResourceBuffer(int resourceCount) {
         this.resourceCount = resourceCount;
+        this.maxChunkSize = resourceCount / 2;
         initResources(resourceCount);
     }
 
-    public Resource<T> produceBegin() throws InterruptedException {
+    public List<Resource<T>> produceBegin(int chunkSize) throws InterruptedException {
+        if (chunkSize > maxChunkSize) {
+            throw new IllegalArgumentException();
+        }
         Resource<T> resource = null;
         freeQueueLock.lock();
         try {
@@ -47,17 +58,18 @@ public class AsynchronousResourceBuffer<T> {
         }
         resource.setState(ResourceState.IN_PRODUCTION);
         resource.setValue(null);
-        return resource;
+        return Arrays.asList(resource);
     }
 
-    public void produceEnd(Resource<T> resource) throws InterruptedException {
-        resource.setState(ResourceState.FULL);
+    public void produceEnd(List<Resource<T>> resources) throws InterruptedException {
+
+//        resource.setState(ResourceState.FULL);
         fullQueueLock.lock();
         try {
             while (fullQueue.size() == resourceCount - freeQueueSize) {
                 fullNotFull.await();
             }
-            fullQueue.add(resource);
+//            fullQueue.add(resource);
             fullQueueSize++;
             fullNotEmpty.signal();
         } finally {
