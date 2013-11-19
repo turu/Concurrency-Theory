@@ -3,6 +3,7 @@ package pl.agh.edu.tw.lab5;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -37,10 +38,10 @@ public class Consumer implements Runnable {
     }
 
     private void doConsume() throws InterruptedException {
-        final Resource<Integer> resource = buffer.consumeBegin();
-        LOG.info("Consumer {} retrieved resource {} to consume", id, resource);
+        final Collection<Resource<Integer>> resources = buffer.consumeBegin(random.nextInt(10));
+        LOG.info("Consumer {} retrieved resources {} to consume", id, resources);
         TimeUnit.MILLISECONDS.sleep(consTimeInMs);
-        buffer.consumeEnd(resource);
-        LOG.info("Consumer {} ended consumption of resource {}", id, resource);
+        buffer.consumeEnd(resources);
+        LOG.info("Consumer {} ended consumption of resources {}", id, resources);
     }
 }

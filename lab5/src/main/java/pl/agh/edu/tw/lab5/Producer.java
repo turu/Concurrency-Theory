@@ -3,6 +3,7 @@ package pl.agh.edu.tw.lab5;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -37,11 +38,13 @@ public class Producer implements Runnable {
     }
 
     private void doProduce() throws InterruptedException {
-//        final List<Resource<T>> resource = buffer.produceBegin();
-        LOG.info("Producer {} acquired resource to produce", id);
+        final Collection<Resource<Integer>> resources = buffer.produceBegin(random.nextInt(10));
+        LOG.info("Producer {} acquired resources to produce", id);
         TimeUnit.MILLISECONDS.sleep(prodTimeInMs);
-//        resource.setValue(random.nextInt(1000));
-//        buffer.produceEnd(resource);
-//        LOG.info("Producer {} produced resource {}", id, resource);
+        for (Resource<Integer> res : resources) {
+            res.setValue(random.nextInt(1000));
+        }
+        buffer.produceEnd(resources);
+        LOG.info("Producer {} produced resources {}", id, resources);
     }
 }

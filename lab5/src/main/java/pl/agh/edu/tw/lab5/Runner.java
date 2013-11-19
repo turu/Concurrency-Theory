@@ -19,9 +19,9 @@ public class Runner {
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     private final Random random = new Random();
-    private final Buffer<Integer> buffer;
-    private final List<SynchronousProducer> producers = new LinkedList<SynchronousProducer>();
-    private final List<SynchronousConsumer> consumers = new LinkedList<SynchronousConsumer>();
+    private final AsynchronousResourceBuffer<Integer> buffer;
+    private final List<Producer> producers = new LinkedList<Producer>();
+    private final List<Consumer> consumers = new LinkedList<Consumer>();
     private final int playTimeInSec;
     private final int numOfProducers;
     private final int numOfConsumers;
@@ -29,7 +29,7 @@ public class Runner {
     public Runner(int maxSize, int playTimeInSec, int numOfProducers, int numOfConsumers) {
         this.numOfProducers = numOfProducers;
         this.numOfConsumers = numOfConsumers;
-        this.buffer = new Buffer<Integer>(maxSize);
+        this.buffer = new AsynchronousResourceBuffer<Integer>(maxSize);
         this.playTimeInSec = playTimeInSec;
     }
 
@@ -50,7 +50,7 @@ public class Runner {
 
     private void submitProducers() {
         for (int i = 0; i < numOfProducers; i++) {
-            final SynchronousProducer producer = new SynchronousProducer(buffer, random.nextInt(1000), random.nextInt(1000));
+            final Producer producer = new Producer(buffer, random.nextInt(1000), random.nextInt(1000));
             producers.add(producer);
             executorService.submit(producer);
         }
@@ -58,14 +58,14 @@ public class Runner {
 
     private void submitConsumers() {
         for (int i = 0; i < numOfConsumers; i++) {
-            final SynchronousConsumer consumer = new SynchronousConsumer(buffer, random.nextInt(1000), random.nextInt(1000));
+            final Consumer consumer = new Consumer(buffer, random.nextInt(1000), random.nextInt(1000));
             consumers.add(consumer);
             executorService.submit(consumer);
         }
     }
 
     public static void main(String[] args) throws InterruptedException {
-        int n = 100, m = 20, l = 5;
+        int n = 1000, m = 20, l = 5;
         LOG.info("Running {} elements, {} producers, {} consumers variant", n, m, l);
         new Runner(n, 30, m, l).play();
     }
