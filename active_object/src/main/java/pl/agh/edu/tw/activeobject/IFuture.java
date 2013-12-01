@@ -6,5 +6,4 @@ package pl.agh.edu.tw.activeobject;
 public interface IFuture<T> {
     boolean isAvailable();
     T get() throws InterruptedException;
-    void set(T result);
 }

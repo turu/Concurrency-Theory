@@ -9,10 +9,10 @@ public class ConsumeMethodRequest<T> implements IMethodRequest {
 
     private final int chunkSize;
     private final ResourceBuffer<T> buffer;
-    private final IFuture<Collection<T>> future;
+    private final FutureImpl<Collection<T>> future;
     private final long priority;
 
-    public ConsumeMethodRequest(int chunkSize, ResourceBuffer<T> buffer, IFuture<Collection<T>> future) {
+    public ConsumeMethodRequest(int chunkSize, ResourceBuffer<T> buffer, FutureImpl<Collection<T>> future) {
         this.chunkSize = chunkSize;
         this.buffer = buffer;
         this.future = future;

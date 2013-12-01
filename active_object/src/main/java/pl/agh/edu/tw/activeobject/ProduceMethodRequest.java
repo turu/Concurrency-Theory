@@ -9,10 +9,10 @@ public class ProduceMethodRequest<T> implements IMethodRequest {
 
     private final Collection<T> chunk;
     private final ResourceBuffer<T> buffer;
-    private final IFuture<Void> future;
+    private final FutureImpl<Void> future;
     private final long priority;
 
-    public ProduceMethodRequest(Collection<T> chunk, ResourceBuffer<T> buffer, IFuture<Void> future) {
+    public ProduceMethodRequest(Collection<T> chunk, ResourceBuffer<T> buffer, FutureImpl<Void> future) {
         this.chunk = chunk;
         this.buffer = buffer;
         this.future = future;
