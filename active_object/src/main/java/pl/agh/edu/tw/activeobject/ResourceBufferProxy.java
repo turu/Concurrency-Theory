@@ -1,11 +1,15 @@
 package pl.agh.edu.tw.activeobject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collection;
 
 /**
  * Author: Piotr Turek
  */
 public class ResourceBufferProxy<T> {
+    private final Logger LOG = LoggerFactory.getLogger(ResourceBufferProxy.class);
 
     private final Scheduler<T> scheduler;
     private final ResourceBuffer<T> buffer;

@@ -48,6 +48,7 @@ public class Producer implements Runnable {
             chunk.add(random.nextInt(1000));
         }
         final IFuture<Void> produce = bufferProxy.produce(chunk);
+        LOG.info("Producer {} submitted for production", id);
         TimeUnit.MILLISECONDS.sleep(simultaneousComputationsTime);
         long totalTime = 0;
         if (!produce.isAvailable()) {

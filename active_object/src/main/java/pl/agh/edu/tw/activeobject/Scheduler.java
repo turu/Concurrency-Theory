@@ -58,18 +58,10 @@ public class Scheduler<T> implements Runnable {
     }
 
     public void schedule(IMethodRequest methodRequest) {
-        doSchedule(methodRequest);
-    }
-
-    private void doSchedule(ProduceMethodRequest<T> methodRequest) {
-        produceQueue.add(methodRequest);
-    }
-
-    private void doSchedule(ConsumeMethodRequest<T> methodRequest) {
-        consumeQueue.add(methodRequest);
-    }
-
-    private void doSchedule(IMethodRequest methodRequest) {
-        throw new IllegalArgumentException();
+        if (methodRequest instanceof ProduceMethodRequest) {
+            produceQueue.add((ProduceMethodRequest)methodRequest);
+        } else {
+            consumeQueue.add((ConsumeMethodRequest)methodRequest);
+        }
     }
 }
