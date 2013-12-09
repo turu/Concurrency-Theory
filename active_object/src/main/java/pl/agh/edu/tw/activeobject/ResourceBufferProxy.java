@@ -1,7 +1,6 @@
 package pl.agh.edu.tw.activeobject;
 
 import java.util.Collection;
-import java.util.concurrent.Future;
 
 /**
  * Author: Piotr Turek
@@ -18,14 +17,14 @@ public class ResourceBufferProxy<T> {
 
 
     public IFuture<Void> produce(Collection<T> chunk) {
-        final FutureImpl<Void> future = new FutureImpl<Void>();
+        final MyFuture<Void> future = new MyFuture<Void>();
         final IMethodRequest methodRequest = new ProduceMethodRequest<T>(chunk, buffer, future);
         scheduler.schedule(methodRequest);
         return future;
     }
 
     public IFuture<Collection<T>> consume(int chunkSize) {
-        final FutureImpl<Collection<T>> future = new FutureImpl<Collection<T>>();
+        final MyFuture<Collection<T>> future = new MyFuture<Collection<T>>();
         final IMethodRequest methodRequest = new ConsumeMethodRequest<T>(chunkSize, buffer, future);
         scheduler.schedule(methodRequest);
         return future;

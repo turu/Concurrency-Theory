@@ -3,7 +3,7 @@ package pl.agh.edu.tw.activeobject;
 /**
  * Author: Piotr Turek
  */
-class FutureImpl<T> implements IFuture<T> {
+class MyFuture<T> implements IFuture<T> {
 
     private T value;
     private volatile boolean available = false;
