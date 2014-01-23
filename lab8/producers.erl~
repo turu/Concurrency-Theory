@@ -1,0 +1,46 @@
+-module(prog).
+-export([main/0, producer/0, consumer/0, buffer/2]).
+
+main() ->
+	spawn(prog, producer, []),
+	spawn(prog, producer, []),
+	spawn(prog, producer, []),
+	register(buff,spawn(prog, buffer, [[],3])),
+	spawn(prog, consumer, []),
+	%blokujemy sie (nie konczymy dzialania)
+	receive
+		Msg -> io:format("~w~n",[Msg])
+	end.
+
+producer() ->
+	buff ! {self(),chce_produkowac},
+	receive
+		{moze_produkowac} -> 
+			io:format("~w: producent moze przekazac ~n",[self()]),
+			buff ! {prod,produkt}
+	end,
+	producer().
+
+consumer() ->
+	buff ! {self(),chce_konsumowac},
+	receive
+		Produkt -> io:format("~w: konsumuje ~w~n",[self(),Produkt])
+	end,
+	consumer().
+
+buffer(Lista,Limit) ->
+	io:format("~w: w stanie ~w~n",[self(),Lista]),
+	receive
+		{ProducerPid,chce_produkowac} when length(Lista)<Limit ->
+		ProducerPid ! {moze_produkowac},
+	receive
+		{prod,Produkt} -> 
+			io:format("~w: otrzymuje ~w~n",[self(),{Produkt}]),
+			buffer([Produkt|Lista], Limit)	
+	end;
+	{ConsumerPid,chce_konsumowac} when length(Lista)>0 ->
+		[A | B] = Lista,
+		ConsumerPid ! {A},
+		buffer(B, Limit)	
+	end.
+

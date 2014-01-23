@@ -15,12 +15,12 @@
 
 	<!-- Application Loggers -->
 	<logger name="pl.agh.edu.tw.lab5">
-		<level value="info" />
+		<level value="error" />
 	</logger>
 
 	<!-- Root Logger -->
 	<root>
-		<priority value="warn" />
+		<priority value="info" />
 		<appender-ref ref="async" />
     </root>
 	

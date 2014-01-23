@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class Runner {
     private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
 
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
+    private ExecutorService executorService = Executors.newCachedThreadPool();
 
     private final Random random = new Random();
     private final AsynchronousResourceBuffer<Integer> buffer;
@@ -25,10 +25,14 @@ public class Runner {
     private final int playTimeInSec;
     private final int numOfProducers;
     private final int numOfConsumers;
+    private int productionLimit;
+    private int consumeLimit;
 
-    public Runner(int maxSize, int playTimeInSec, int numOfProducers, int numOfConsumers) {
+    public Runner(int maxSize, int playTimeInSec, int numOfProducers, int numOfConsumers, int productionLimit, int consumeLimit) {
         this.numOfProducers = numOfProducers;
         this.numOfConsumers = numOfConsumers;
+        this.productionLimit = productionLimit;
+        this.consumeLimit = consumeLimit;
         this.buffer = new AsynchronousResourceBuffer<Integer>(maxSize);
         this.playTimeInSec = playTimeInSec;
     }
@@ -37,10 +41,12 @@ public class Runner {
         try {
             submitTasks();
             TimeUnit.SECONDS.sleep(playTimeInSec);
+            executorService.shutdown();
+            LOG.error("DUPA: {}", executorService.awaitTermination(30, TimeUnit.SECONDS));
+            executorService = Executors.newCachedThreadPool();
         } catch (InterruptedException e) {
             LOG.info("NumberWorkshop interrupted");
         }
-        executorService.shutdownNow();
     }
 
     private void submitTasks() {
@@ -50,7 +56,7 @@ public class Runner {
 
     private void submitProducers() {
         for (int i = 0; i < numOfProducers; i++) {
-            final Producer producer = new Producer(buffer, random.nextInt(1000), random.nextInt(1000));
+            final Producer producer = new Producer(buffer, random.nextInt(1), random.nextInt(1), productionLimit);
             producers.add(producer);
             executorService.submit(producer);
         }
@@ -58,15 +64,25 @@ public class Runner {
 
     private void submitConsumers() {
         for (int i = 0; i < numOfConsumers; i++) {
-            final Consumer consumer = new Consumer(buffer, random.nextInt(1000), random.nextInt(1000));
+            final Consumer consumer = new Consumer(buffer, random.nextInt(1), random.nextInt(1), consumeLimit);
             consumers.add(consumer);
             executorService.submit(consumer);
         }
     }
 
     public static void main(String[] args) throws InterruptedException {
-        int n = 1000, m = 20, l = 5;
-        LOG.info("Running {} elements, {} producers, {} consumers variant", n, m, l);
-        new Runner(n, 30, m, l).play();
+        int bufferSize = 50, prodCount = 10, consCount = 10;
+        final int productionLimit = 100;
+        final int consumeLimit = 100;
+        while (prodCount < 400) {
+            LOG.info("Running {} elements, {} producers, {} consumers variant", bufferSize, prodCount, consCount);
+            long startTime = System.currentTimeMillis();
+            new Runner(bufferSize, 0, prodCount, consCount, productionLimit, consumeLimit).play();
+            long endTime = System.currentTimeMillis();
+            LOG.error("<<< Producers: {}, Consumers: {}, Buffer: {}, TOTAL_TIME: {} >>>", prodCount, consCount, bufferSize,
+                    endTime - startTime);
+            prodCount += 10;
+            consCount += 10;
+        }
     }
 }

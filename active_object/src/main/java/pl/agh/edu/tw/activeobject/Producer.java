@@ -20,29 +20,34 @@ public class Producer implements Runnable {
     private final int sleepTimeInMs;
     private final int simultaneousComputationsTime;
     private final int id = ID++;
+    private final int prodLimit;
 
-    public Producer(ResourceBufferProxy<Integer> bufferProxy, int sleepTimeInMs, int simultaneousComputationsTime) {
+    public Producer(ResourceBufferProxy<Integer> bufferProxy, int sleepTimeInMs, int simultaneousComputationsTime,
+                    int prodLimit) {
         this.bufferProxy = bufferProxy;
         this.sleepTimeInMs = sleepTimeInMs;
         this.simultaneousComputationsTime = simultaneousComputationsTime;
+        this.prodLimit = prodLimit;
     }
 
 
     @Override
     public void run() {
         try {
-            while (!Thread.currentThread().isInterrupted()) {
-                doProduce();
+            int prodCounter = 0;
+            while (!Thread.currentThread().isInterrupted() && prodCounter < prodLimit) {
+                prodCounter += doProduce(prodCounter);
                 TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
             }
+            LOG.info("Producer {} ended processing", id);
         } catch (InterruptedException ex) {
             LOG.info("Producer {} has been interrupted", id);
         }
 
     }
 
-    private void doProduce() throws InterruptedException {
-        final int chunkSize = random.nextInt(10);
+    private int doProduce(int prodCounter) throws InterruptedException {
+        final int chunkSize = computeChunkSize(prodCounter);
         final Collection<Integer> chunk = new ArrayList<Integer>();
         for (int i = 0; i < chunkSize; i++) {
             chunk.add(random.nextInt(1000));
@@ -60,5 +65,10 @@ public class Producer implements Runnable {
         }
         LOG.info("Producer {} produced resources: {}. Total wait time: {}, simultaneous computations took {} ms",
                 id, chunk, totalTime, simultaneousComputationsTime);
+        return chunkSize;
+    }
+
+    private int computeChunkSize(int prodCounter) {
+        return Math.min(random.nextInt(10), prodLimit - prodCounter);
     }
 }

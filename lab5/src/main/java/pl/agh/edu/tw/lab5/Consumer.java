@@ -18,18 +18,21 @@ public class Consumer implements Runnable {
     private final int sleepTimeInMs;
     private final int consTimeInMs;
     private final int id = ID++;
+    private int consumeLimit;
 
-    public Consumer(AsynchronousResourceBuffer<Integer> buffer, int sleepTimeInMs, int consTimeInMs) {
+    public Consumer(AsynchronousResourceBuffer<Integer> buffer, int sleepTimeInMs, int consTimeInMs, int consumeLimit) {
         this.buffer = buffer;
         this.sleepTimeInMs = sleepTimeInMs;
         this.consTimeInMs = consTimeInMs;
+        this.consumeLimit = consumeLimit;
     }
 
     @Override
     public void run() {
         try {
-            while(!Thread.currentThread().isInterrupted()) {
-                doConsume();
+            int consCounter = 0;
+            while(!Thread.currentThread().isInterrupted() && consCounter < consumeLimit) {
+                consCounter += doConsume();
                 TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
             }
         } catch (InterruptedException ex) {
@@ -37,11 +40,13 @@ public class Consumer implements Runnable {
         }
     }
 
-    private void doConsume() throws InterruptedException {
-        final Collection<Resource<Integer>> resources = buffer.consumeBegin(random.nextInt(10));
+    private int doConsume() throws InterruptedException {
+        final int chunkSize = random.nextInt(9) + 1;
+        final Collection<Resource<Integer>> resources = buffer.consumeBegin(chunkSize);
         LOG.info("Consumer {} retrieved resources {} to consume", id, resources);
         TimeUnit.MILLISECONDS.sleep(consTimeInMs);
         buffer.consumeEnd(resources);
         LOG.info("Consumer {} ended consumption of resources {}", id, resources);
+        return chunkSize;
     }
 }

@@ -18,18 +18,21 @@ public class Producer implements Runnable {
     private final int sleepTimeInMs;
     private final int prodTimeInMs;
     private final int id = ID++;
+    private final int productionLimit;
 
-    public Producer(AsynchronousResourceBuffer<Integer> buffer, int sleepTimeInMs, int prodTimeInMs) {
+    public Producer(AsynchronousResourceBuffer<Integer> buffer, int sleepTimeInMs, int prodTimeInMs, int productionLimit) {
         this.buffer = buffer;
         this.sleepTimeInMs = sleepTimeInMs;
         this.prodTimeInMs = prodTimeInMs;
+        this.productionLimit = productionLimit;
     }
 
     @Override
     public void run() {
         try {
-            while(!Thread.currentThread().isInterrupted()) {
-                doProduce();
+            int prodCounter = 0;
+            while(!Thread.currentThread().isInterrupted() && prodCounter < productionLimit) {
+                prodCounter += doProduce();
                 TimeUnit.MILLISECONDS.sleep(sleepTimeInMs);
             }
         } catch (InterruptedException ex) {
@@ -37,8 +40,9 @@ public class Producer implements Runnable {
         }
     }
 
-    private void doProduce() throws InterruptedException {
-        final Collection<Resource<Integer>> resources = buffer.produceBegin(random.nextInt(10));
+    private int doProduce() throws InterruptedException {
+        final int chunkSize = random.nextInt(9) + 1;
+        final Collection<Resource<Integer>> resources = buffer.produceBegin(chunkSize);
         LOG.info("Producer {} acquired resources to produce", id);
         TimeUnit.MILLISECONDS.sleep(prodTimeInMs);
         for (Resource<Integer> res : resources) {
@@ -46,5 +50,6 @@ public class Producer implements Runnable {
         }
         buffer.produceEnd(resources);
         LOG.info("Producer {} produced resources {}", id, resources);
+        return chunkSize;
     }
 }
